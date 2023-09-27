@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-pzt1x3t)m-e@m@$*r&rpgvqpxjyl$r4^y7l8xl3iyfb2#4gf9^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', True)
 
 ALLOWED_HOSTS = ['www.pm.ang.ir', 'pm.ang.ir', '0.0.0.0', '127.0.0.1']
 
@@ -75,23 +75,16 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pm',
-        'USER': 'root',
-        'PASSWORD': 'xSE84TvrXOl8tVsePMXLIjKD',
-        'HOST': 'luca.iran.liara.ir',  # Or an IP Address that your DB is hosted on
-        'PORT': '33238',
+        'NAME': os.getenv('DB_NAME', 'pm'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'xSE84TvrXOl8tVsePMXLIjKD'),
+        'HOST': os.getenv('DB_HOST', 'ang-db'),
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': 'SET storage_engine=MyISAM',
         }
     }
 }
-#
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 
 # Password validation
