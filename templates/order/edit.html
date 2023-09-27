@@ -1,0 +1,130 @@
+{% extends '../base.html' %}
+{% load crispy_forms_filters %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">ویرایش درخواست</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <div class="alert alert-solid-primary" role="alert">
+                    <label for="">وضعیت درخواست : {{ order.get_status_display }}</label>
+                    {% if not order.isConfirmed and perms.base.change_order %}
+                        <button type="button" class="btn btn-label-primary btn-sm" data-orderid="{{ order.orderId }}"
+                                id="confirmOrderBtn">تایید درخواست
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            <form id="formValidationExamples" action="{% url 'order_edit' order.orderId %}" method="post">
+                {% csrf_token %}
+                <div class="row g-4">
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">عملیات درخواستی*</label>
+                        <select class="select2 form-select form-select-lg" data-allow-clear="true" name="operation"
+                                required>
+                            {% for operation in operations %}
+                                <option value="{{ operation.id }}" {% if operation.id == order.operation.id %} selected
+                                {% endif %}>
+                                    {{ operation.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if order.is_for_machine %}
+                        <div class="col-md-3 mb-1">
+                            <label for="" class="form-label">قطعات مربوطه</label>
+                            <select class="select2 form-select form-select-lg" id="partselect" data-allow-clear="true"
+                                    name="part">
+                                <option value="">لطفا انتخاب کنید</option>
+                                {% for part in order.operation.parts.all %}
+                                    <option value="{{ part.id }}" {% if order.part.id == part.id %}
+                                            selected{% endif %}>{{ part.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% elif order.is_for_department %}
+                        <div class="col-md-3 mb-1">
+                            <label for="" class="form-label">وسیله مربوطه</label>
+                            <select class="select2 form-select form-select-lg" id="stuffselect" data-allow-clear="true"
+                                    name="part">
+                                <option value="">لطفا انتخاب کنید</option>
+                                {% for stuff in order.department.stuffs.all %}
+                                    <option value="{{ stuff.id }}" {% if order.stuff == stuff.id %}
+                                            selected{% endif %}>{{ stuff.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+                    <div class="col-md-2 mb-1">
+                        <label for="" class="form-label">واحد*</label>
+                        <select class="select2 form-select form-select-lg" data-allow-clear="true" name="department"
+                                required>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}" {% if department.id == order.department.id %}
+                                        selected
+                                {% endif %}>{{ department.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-1">
+                        <label for="second_status" class="form-label">وضعیت</label>
+                        <select class="select2 form-select form-select-lg" id="second_status" data-allow-clear="true"
+                                name="status"
+                                required>
+                            {% for key, text in status_choices %}
+                                <option value="{{ key }}"
+                                        {% if order.status == key %} selected
+                                        {% endif %}>{{ text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-1">
+                        <label for="select2Success" class="form-label">زیرگروه</label>
+                        <div class="select2-success">
+                            <select id="select2Success" class="select2 form-select" name="subgroup" multiple required>
+                                {% for subgroup in subgroups %}
+                                    <option value="{{ subgroup.id }}" {% for order_sub in order.subGroup.all %}
+                                        {% if order_sub.id == subgroup.id %} selected {% endif %} {% endfor %}>
+                                        {{ subgroup.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 mb-1">
+                        <label for="" class="form-label">اولویت</label>
+                        <select class="form-select" name="priority" id="">
+                            <option value="">انتخاب کنید</option>
+                            <option value="1" {% if order.priority == '1' %} selected {% endif %}>کم</option>
+                            <option value="2" {% if order.priority == '2' %} selected {% endif %}>متوسط</option>
+                            <option value="3" {% if order.priority == '3' %} selected {% endif %}>زیاد</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mb-1">
+                        {{ form.description|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="mt-1">
+                    <button type="submit" class="btn btn-primary me-2">ویرایش</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+{% endblock content %}

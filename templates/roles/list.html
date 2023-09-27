@@ -1,0 +1,839 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">لیست نقش‌ها</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Role cards -->
+    <div class="row g-4">
+        {% for role in roles %}
+            <div class="col-xl-4 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-1">
+                            <h6 class="fw-normal">{{ role.user_set.all|length }}</h6>
+                            <ul class="list-unstyled d-flex avatar-group mb-0">
+                                {% for user in role.user_set.all %}
+                                    <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
+                                        title="{{ user.profile }}" class="avatar avatar-sm pull-up">
+                                        <img class="rounded-circle" src="{% static 'img/avatars/default.png' %}"
+                                             alt="{{ user.profile }}">
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div class="role-heading">
+                                <h4 class="mb-1">{{ role.name }}</h4>
+                                <a href="javascript:;" data-bs-toggle="modal"
+                                   data-bs-target="#editRoleModal_{{ role.id }}"
+                                   class="role-edit-modal"><small>ویرایش نقش</small></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--/ Edit Role Modal -->
+            <div class="modal fade" id="editRoleModal_{{ role.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+                    <div class="modal-content p-3 p-md-5">
+                        <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        <div class="modal-body">
+                            <div class="text-center mb-4">
+                                <h3 class="role-title">ویرایش نقش</h3>
+                                <p>مجوزهای نقش را تنظیم کنید</p>
+                            </div>
+                            <!-- Edit role form -->
+                            {% for per in role.permissions.all %}
+                                {{ per.codename }}
+                            {% endfor %}
+                            <form method="post" class="row g-3" action="{% url 'role_edit' role.id %}">
+
+                                {% csrf_token %}
+                                <div class="col-12 mb-4">
+                                    <label class="form-label" for="roleName">نام نقش</label>
+                                    <input type="text" id="roleName" name="roleName" class="form-control"
+                                           value="{{ role.name }}" tabindex="-1" required>
+                                </div>
+                                <div class="col-12">
+                                    <h5>مجوزهای نقش</h5>
+                                    <!-- Permission table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-flush-spacing">
+                                            <tbody>
+                                            <tr>
+                                                <td class="text-nowrap">
+                                                    دسترسی مدیریت
+                                                    <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip"
+                                                       data-bs-placement="top"
+                                                       title="دسترسی کامل به سیستم را اجازه می‌دهد"></i>
+                                                </td>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value=""
+                                                               id="selectAll">
+                                                        <label class="form-check-label" for="selectAll"> انتخاب
+                                                            همه </label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-nowrap">مدیریت درخواست ها</td>
+                                                <td>
+                                                    <div class="">
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_order_all' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %} id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_order_all">
+                                                            <label class="form-check-label" for="userManagementRead">
+                                                                مشاهده
+                                                                همه
+                                                                درخواست ها
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   id="userManagementRead" name="permission"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_order' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %} value="view_order">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">
+                                                                مشاهده
+                                                                درخواست های واحد مربوطه
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'add_order' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %} id="userManagementWrite"
+                                                                   name="permission"
+                                                                   value="add_order">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementWrite">
+                                                                ایجاد
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'change_order' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %} id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="change_order">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                ویرایش
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'delete_order' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %} id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="delete_order">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                حذف
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-nowrap">مدیریت درخواست شروع به کار
+                                                </td>
+                                                <td>
+                                                    <div class="">
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_task_all' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_task_all">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">مشاهده
+                                                                همه</label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_task' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_task">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">مشاهده
+                                                                درخواست مربوطه
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'add_task' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementWrite"
+                                                                   name="permission"
+                                                                   value="add_task">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementWrite">
+                                                                ایجاد
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'change_task' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="change_task">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                ویرایش
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'delete_task' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="delete_task">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                حذف
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-nowrap">مدیریت کاربر</td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_user' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_user">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">
+                                                                مشاهده
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'add_user' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementWrite"
+                                                                   name="permission"
+                                                                   value="add_user">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementWrite">
+                                                                ایجاد
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'change_user' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="change_user">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                ویرایش
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'delete_user' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="delete_user">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                حذف
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-nowrap">مدیریت واحد</td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_department' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_department">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">
+                                                                مشاهده
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'add_department' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementWrite"
+                                                                   name="permission"
+                                                                   value="add_department">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementWrite">
+                                                                ایجاد
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'change_department' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="change_department">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                ویرایش
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'delete_department' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="delete_department">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                حذف
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-nowrap">مدیریت عملیات</td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_operation' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_operation">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">
+                                                                مشاهده
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'add_operation' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementWrite"
+                                                                   name="permission"
+                                                                   value="add_operation">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementWrite">
+                                                                ایجاد
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'change_operation' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="change_operation">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                ویرایش
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'delete_operation' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="delete_operation">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                حذف
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-nowrap">مدیریت زیرگروه</td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'view_subgroup' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementRead"
+                                                                   name="permission"
+                                                                   value="view_subgroup">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementRead">
+                                                                مشاهده
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'add_subgroup' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementWrite"
+                                                                   name="permission"
+                                                                   value="add_subgroup">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementWrite">
+                                                                ایجاد
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0 me-3 me-lg-5">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'change_subgroup' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="change_subgroup">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                ویرایش
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-0">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                    {% for per in role.permissions.all %}
+                                                                   {% if per.codename == 'delete_subgroup' %}checked
+                                                                   {% endif %}
+                                                                    {% endfor %}
+                                                                   id="userManagementCreate"
+                                                                   name="permission"
+                                                                   value="delete_subgroup">
+                                                            <label class="form-check-label"
+                                                                   for="userManagementCreate">
+                                                                حذف
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- Permission table -->
+                                </div>
+                                <div class="col-12 text-center">
+                                    <button type="submit"
+                                            class="btn btn-primary me-sm-3 me-1">ثبت
+                                    </button>
+                                    <button type="reset" class="btn btn-label-secondary"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close">
+                                        انصراف
+                                    </button>
+                                </div>
+                            </form>
+                            <!--/ Edit role form -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / Edit Role Modal -->
+        {% endfor %}
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="card h-100">
+                <div class="row h-100">
+                    <div class="col-sm-5">
+                        <div class="d-flex align-items-end h-100 justify-content-center mt-sm-0 mt-3">
+                            <img src="{% static 'img/illustrations/boy-working-light.png' %}" class="img-fluid"
+                                 alt="Image" width="100" data-app-light-img="illustrations/lady-with-laptop-light.png"
+                                 data-app-dark-img="illustrations/boy-working-dark.png">
+                        </div>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="card-body text-sm-end text-center ps-sm-0">
+                            <button data-bs-target="#addRoleModal" data-bs-toggle="modal"
+                                    class="btn btn-primary mb-3 text-nowrap add-new-role">
+                                افزودن نقش جدید
+                            </button>
+                            <p class="mb-0">اگر نقشی وجود ندارد اضافه کنید</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Role cards -->
+
+    <!--/ Add Role Modal -->
+    <div class="modal fade" id="addRoleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+            <div class="modal-content p-3 p-md-5">
+                <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h3 class="role-title">افزودن نقش جدید</h3>
+                        <p>مجوزهای نقش را تنظیم کنید</p>
+                    </div>
+                    <!-- Add role form -->
+                    <form method="post" class="row g-3" action="{% url 'role_add' %}">
+                        {% csrf_token %}
+                        <div class="col-12 mb-4">
+                            <label class="form-label" for="roleName">نام نقش</label>
+                            <input type="text" id="roleName" name="roleName" class="form-control"
+                                   placeholder="نام نقش را وارد کنید" tabindex="-1" required>
+                        </div>
+                        <div class="col-12">
+                            <h5>مجوزهای نقش</h5>
+                            <!-- Permission table -->
+                            <div class="table-responsive">
+                                <table class="table table-flush-spacing">
+                                    <tbody>
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            دسترسی مدیریت
+                                            <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip"
+                                               data-bs-placement="top"
+                                               title="دسترسی کامل به سیستم را اجازه می‌دهد"></i>
+                                        </td>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="" id="selectAll">
+                                                <label class="form-check-label" for="selectAll"> انتخاب همه </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap">مدیریت درخواست ها</td>
+                                        <td>
+                                            <div class="">
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission"
+                                                           value="view_order_all">
+                                                    <label class="form-check-label" for="userManagementRead"> مشاهده همه
+                                                        درخواست ها
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission" value="view_order">
+                                                    <label class="form-check-label" for="userManagementRead"> مشاهده
+                                                        درخواست های واحد مربوطه
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementWrite" name="permission" value="add_order">
+                                                    <label class="form-check-label" for="userManagementWrite"> ایجاد
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="change_order">
+                                                    <label class="form-check-label" for="userManagementCreate"> ویرایش
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="delete_order">
+                                                    <label class="form-check-label" for="userManagementCreate"> حذف
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap">مدیریت درخواست شروع به کار</td>
+                                        <td>
+                                            <div class="">
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission"
+                                                           value="view_task_all">
+                                                    <label class="form-check-label" for="userManagementRead">مشاهده
+                                                        همه</label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission" value="view_task">
+                                                    <label class="form-check-label" for="userManagementRead">مشاهده
+                                                        درخواست های مربوطه</label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementWrite" name="permission" value="add_task">
+                                                    <label class="form-check-label" for="userManagementWrite"> ایجاد
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="change_task">
+                                                    <label class="form-check-label" for="userManagementCreate"> ویرایش
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="delete_task">
+                                                    <label class="form-check-label" for="userManagementCreate"> حذف
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap">مدیریت کاربر</td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission" value="view_user">
+                                                    <label class="form-check-label" for="userManagementRead"> مشاهده
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementWrite" name="permission" value="add_user">
+                                                    <label class="form-check-label" for="userManagementWrite"> ایجاد
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="change_user">
+                                                    <label class="form-check-label" for="userManagementCreate"> ویرایش
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="delete_user">
+                                                    <label class="form-check-label" for="userManagementCreate"> حذف
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap">مدیریت واحد</td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission"
+                                                           value="view_department">
+                                                    <label class="form-check-label" for="userManagementRead"> مشاهده
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementWrite" name="permission"
+                                                           value="add_department">
+                                                    <label class="form-check-label" for="userManagementWrite"> ایجاد
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="change_department">
+                                                    <label class="form-check-label" for="userManagementCreate"> ویرایش
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="delete_department">
+                                                    <label class="form-check-label" for="userManagementCreate"> حذف
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap">مدیریت عملیات</td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission"
+                                                           value="view_operation">
+                                                    <label class="form-check-label" for="userManagementRead"> مشاهده
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementWrite" name="permission"
+                                                           value="add_operation">
+                                                    <label class="form-check-label" for="userManagementWrite"> ایجاد
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="change_operation">
+                                                    <label class="form-check-label" for="userManagementCreate"> ویرایش
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="delete_operation">
+                                                    <label class="form-check-label" for="userManagementCreate"> حذف
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap">مدیریت زیرگروه</td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementRead" name="permission"
+                                                           value="view_subgroup">
+                                                    <label class="form-check-label" for="userManagementRead"> مشاهده
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementWrite" name="permission"
+                                                           value="add_subgroup">
+                                                    <label class="form-check-label" for="userManagementWrite"> ایجاد
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0 me-3 me-lg-5">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="change_subgroup">
+                                                    <label class="form-check-label" for="userManagementCreate"> ویرایش
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="userManagementCreate" name="permission"
+                                                           value="delete_subgroup">
+                                                    <label class="form-check-label" for="userManagementCreate"> حذف
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Permission table -->
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-primary me-sm-3 me-1">ثبت</button>
+                            <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                انصراف
+                            </button>
+                        </div>
+                    </form>
+                    <!--/ Add role form -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / Add Role Modal -->
+{% endblock content %}

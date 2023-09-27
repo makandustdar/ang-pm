@@ -1,0 +1,141 @@
+{% extends './base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-12 col-md-4 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-success">
+            <i class="bx bx-user fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">تعداد کاربران</span>
+                    <h2 class="mb-n3">{{ users|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-primary">
+            <i class="bx bx-receipt fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">تعداد درخواست ها</span>
+                    <h2 class="mb-n3">{{ orders|length }}</h2>
+                    <a href="{% url 'orders_list' %}" class="btn btn-label-primary mt-2"
+                       style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+                    <span class="avatar-initial rounded-circle bg-label-warning">
+                      <i class="bx bx-task fs-4"></i>
+                    </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">تعداد کار ها</span>
+                    <h2 class="mb-n3">{{ tasks|length }}</h2>
+                    <a href="{% url 'tasks_list' %}" class="btn btn-label-warning mt-2"
+                       style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-4 col-lg-2 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+                    <span class="avatar-initial rounded-circle bg-label-warning">
+                      <i class="bx bx-task fs-4"></i>
+                    </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">کارهای انجام شده</span>
+                    <h2 class="mb-n3">{{ tasks_done|length }}</h2>
+                    <a href="{% url 'tasks_list' %}?status=DN" class="btn btn-label-warning mt-2"
+                       style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-vimeo">
+            <i class="bx bx-save fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">کارهای ثبت شده</span>
+                    <h2 class="mb-n3">{{ tasks_saved|length }}</h2>
+                    <a href="{% url 'tasks_list' %}?status=SV" class="btn btn-label-vimeo mt-2" style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-dribbble">
+            <i class="bx bx-task fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">کارهای مشاهده شده</span>
+                    <h2 class="mb-n3">{{ tasks_seen|length }}</h2>
+                    <a href="{% url 'tasks_list' %}?status=SE" class="btn btn-label-dribbble mt-2"
+                       style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-google-plus">
+            <i class="bx bx-task fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">کارهای در حال انجام</span>
+                    <h2 class="mb-n3">{{ tasks_doing|length }}</h2>
+                    <a href="{% url 'tasks_list' %}?status=DG" class="btn btn-label-google-plus mt-2" style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-linkedin">
+            <i class="bx bx-task fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block text-nowrap pt-1">کارهای در حال انتظار</span>
+                    <h2 class="mb-n3">{{ tasks_waiting|length }}</h2>
+                    <a href="{% url 'tasks_list' %}?status=WG" class="btn btn-label-linkedin mt-2"
+                       style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-2">
+          <span class="avatar-initial rounded-circle bg-label-warning">
+            <i class="bx bx-task fs-4"></i>
+          </span>
+                    </div>
+                    <span class="d-block normal pt-1">کارهای ارسال شده به پیمانکار</span>
+                    <h2 class="mb-n3">{{ tasks_sent|length }}</h2>
+                    <a href="{% url 'tasks_list' %}?status=ST" class="btn btn-label-warning mt-2"
+                       style="display: block;">مشاهده</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

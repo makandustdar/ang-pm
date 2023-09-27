@@ -1,0 +1,400 @@
+{#{% extends '../base.html' %}#}
+{##}
+{#{% load static %}#}
+{##}
+{#{% block content %}#}
+{##}
+{#    <h4 class="py-3 breadcrumb-wrapper mb-2">لیست ماشین ها</h4>#}
+{##}
+{#    {% for message in messages %}#}
+{#        {% if message.tags == 'error' %}#}
+{#            <div class="alert alert-danger">{{ message }}</div>#}
+{#        {% else %}#}
+{#            <div class="alert alert-{{ message.tags }}">{{ message }}</div>#}
+{#        {% endif %}#}
+{#    {% endfor %}#}
+{##}
+{#    <!-- Role cards -->#}
+{#    <div class="row g-4">#}
+{#        {% for operation in operations %}#}
+{#            <div class="col-xl-3 col-lg-4 col-md-6">#}
+{#                <div class="card">#}
+{#                    <div class="card-body">#}
+{#                        <div class="d-flex justify-content-between mb-1">#}
+{#                            <h6 class="fw-normal">#}
+{#                                {{ operation.order.all|length }}#}
+{#                            </h6>#}
+{#                        </div>#}
+{#                        <div class="d-flex justify-content-between align-items-end">#}
+{#                            <div class="role-heading">#}
+{#                                <h4 class="mb-1" style="font-size:1rem">#}
+{#                                    <a href="{% url 'tasks_list' %}?operation={{ operation.id }}">#}
+{#                                        {{ operation.name }}#}
+{#                                    </a>#}
+{#                                </h4>#}
+{#                                <a href="javascript:;" data-bs-toggle="modal"#}
+{#                                   data-bs-target="#editOperationModal_{{ operation.id }}"#}
+{#                                   class="role-edit-modal">#}
+{#                                    <small>ویرایش ماشین</small>#}
+{##}
+{#                                </a>#}
+{##}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <!--/ Edit Role Modal -->#}
+{#            <div class="modal fade" id="editOperationModal_{{ operation.id }}" tabindex="-1" aria-hidden="true">#}
+{#                <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">#}
+{#                    <div class="modal-content p-3 p-md-5">#}
+{#                        <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal"#}
+{#                                aria-label="Close"></button>#}
+{#                        <div class="modal-body">#}
+{#                            <div class="text-center mb-4">#}
+{#                                <h3 class="role-title">ویرایش ماشین</h3>#}
+{#                            </div>#}
+{#                            <!-- Edit role form -->#}
+{#                            <form method="post" class="row g-3" action="{% url 'operation_edit' operation.id %}">#}
+{#                                {% csrf_token %}#}
+{#                                <div class="col-12 mb-4">#}
+{#                                    <label class="form-label" for="operationName">نام ماشین</label>#}
+{#                                    <input type="text" id="operationName" name="operationName" class="form-control"#}
+{#                                           value="{{ operation.name }}" tabindex="-1" required>#}
+{#                                </div>#}
+{##}
+{#                                <div class="col-12 text-center">#}
+{#                                    <button type="submit" class="btn btn-primary me-sm-3 me-1">ویرایش</button>#}
+{#                                    <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"#}
+{#                                            aria-label="Close">#}
+{#                                        انصراف#}
+{#                                    </button>#}
+{#                                </div>#}
+{#                            </form>#}
+{#                            <!--/ Edit role form -->#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <!-- / Edit Role Modal -->#}
+{#        {% endfor %}#}
+{#        <div class="col-xl-4 col-lg-6 col-md-6">#}
+{#            <div class="card h-100">#}
+{#                <div class="row h-100">#}
+{#                    <div class="col-sm-5">#}
+{#                        <div class="d-flex align-items-end h-100 justify-content-center mt-sm-0 mt-3">#}
+{#                            <img src="{% static 'img/illustrations/lady-with-laptop-light.png' %}" class="img-fluid"#}
+{#                                 alt="Image" width="100" data-app-light-img="illustrations/boy-working-light.png"#}
+{#                                 data-app-dark-img="illustrations/boy-working-dark.png">#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-7">#}
+{#                        <div class="card-body text-sm-end text-center ps-sm-0">#}
+{#                            <button data-bs-target="#addoperationModal" data-bs-toggle="modal"#}
+{#                                    class="btn btn-primary mb-3 text-nowrap add-new-role">#}
+{#                                افزودن ماشین جدید#}
+{#                            </button>#}
+{#                            <p class="mb-0">اگر ماشینی وجود ندارد اضافه کنید</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    <!--/ Role cards -->#}
+{##}
+{#    <!--/ Add Role Modal -->#}
+{#    <div class="modal fade" id="addoperationModal" tabindex="-1" aria-hidden="true">#}
+{#        <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">#}
+{#            <div class="modal-content p-3 p-md-5">#}
+{#                <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>#}
+{#                <div class="modal-body">#}
+{#                    <div class="text-center mb-4">#}
+{#                        <h3 class="role-title">افزودن ماشین جدید</h3>#}
+{#                        <p>مجوزهای ماشین را تنظیم کنید</p>#}
+{#                    </div>#}
+{#                    <!-- Add role form -->#}
+{#                    <form method="post" class="row g-3" action="{% url 'operation_add' %}">#}
+{#                        {% csrf_token %}#}
+{#                        <div class="col-12 mb-4">#}
+{#                            <label class="form-label" for="operationName">نام ماشین</label>#}
+{#                            <input type="text" id="operationName" name="operationName" class="form-control"#}
+{#                                   placeholder="نام ماشین را وارد کنید" tabindex="-1" required>#}
+{#                        </div>#}
+{#                        <div class="col-12 mb-4">#}
+{#                            <label class="form-label" for="area">سالن محل استفاده</label>#}
+{#                            <select name="area" id="area" class="form-control">#}
+{#                                {% for department in departments %}#}
+{#                                    <option value="{{ department.id }}">{{ department.name }}</option>#}
+{#                                {% endfor %}#}
+{#                            </select>#}
+{#                        </div>#}
+{#                        <div class="col-12 mb-4">#}
+{#                            <label class="form-label" for="station">ایستگاه محل استقرار</label>#}
+{#                            <select name="station" id="station" class="form-control">#}
+{#                                {% for station in stations %}#}
+{#                                    <option value="{{ station.id }}">{{ station.name }}</option>#}
+{#                                {% endfor %}#}
+{#                            </select>#}
+{#                        </div>#}
+{#                        <div class="col-12 text-center">#}
+{#                            <button type="submit" class="btn btn-primary me-sm-3 me-1">ثبت</button>#}
+{#                            <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"#}
+{#                                    aria-label="Close">#}
+{#                                انصراف#}
+{#                            </button>#}
+{#                        </div>#}
+{#                    </form>#}
+{#                    <!--/ Add role form -->#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    <!-- / Add Role Modal -->#}
+{#{% endblock content %}#}
+
+{% extends 'base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+{% block content %}
+
+    <div class="d-flex justify-content-between mb-2">
+        <h4 class="breadcrumb-wrapper mb-0">لیست ماشین ها</h4>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success h-25 align-self-center" data-bs-toggle="modal"
+                data-bs-target="#modalCenter">
+            افزودن
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title secondary-font" id="modalCenterTitle">ساخت ماشین جدید</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'operation_add' %}" method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col mb-3">
+                                    <label for="nameWithTitle" class="form-label">نام</label>
+                                    <input type="text" id="nameWithTitle" name="operationName" class="form-control"
+                                           placeholder="نام ماشین">
+                                </div>
+                            </div>
+                            {#                            <div class="row g-2">#}
+                            {#                                <div class="col mb-0">#}
+                            {#                                    <label for="emailWithTitle" class="form-label">ماشین</label>#}
+                            {#                                    <select name="machine" id="" class="form-control">#}
+                            {#                                        {% for machine in machines %}#}
+                            {#                                            <option value="{{ machine.id }}">{{ machine.name }}</option>#}
+                            {#                                        {% endfor %}#}
+                            {#                                    </select>#}
+                            {#                                </div>#}
+                            {#                            </div>#}
+                            <div class="col-12 mb-4">
+                                <label class="form-label" for="area">سالن محل استفاده</label>
+                                <select name="area" id="area" class="form-control">
+                                    {% for department in departments %}
+                                        <option value="{{ department.id }}">{{ department.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <label class="form-label" for="station">ایستگاه محل استقرار</label>
+                                <select name="station" id="station" class="form-control">
+                                    {% for station in stations %}
+                                        <option value="{{ station.id }}">{{ station.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">ایجاد</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+    {% if operations %}
+        <div class="card">
+            <div class="card-datatable table-responsive">
+                <table class="table border-top text-center table-striped">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>نام ماشین</th>
+                        <th>تعداد سفارشات مربوطه</th>
+                        <th>عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for machine in operations %}
+                        <tr>
+                            <td>{{ machine.name }}</td>
+                            <td>{{ machine.order.all|length }}</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    {% if perms.base.change_operation %}
+                                        {#                                        <a href="{% url 'operation_edit' machine.id %}" class="btn btn-sm btn-icon">#}
+                                        {#                                            <i class="bx bx-edit"></i>#}
+                                        {#                                        </a>#}
+                                        <a href="javascript:;" data-bs-toggle="modal"
+                                           data-bs-target="#editOperationModal_{{ machine.id }}"
+                                           class="role-edit-modal">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                        <div class="modal fade" id="editOperationModal_{{ machine.id }}" tabindex="-1"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+                                                <div class="modal-content p-3 p-md-5">
+                                                    <button type="button" class="btn-close btn-pinned"
+                                                            data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    <div class="modal-body">
+                                                        <div class="text-center mb-4">
+                                                            <h3 class="role-title">ویرایش ماشین</h3>
+                                                        </div>
+                                                        <!-- Edit role form -->
+                                                        <form method="post" class="row g-3"
+                                                              action="{% url 'operation_edit' machine.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="col-12 mb-4">
+                                                                <label class="form-label" for="operationName">نام
+                                                                    ماشین</label>
+                                                                <input type="text" id="operationName"
+                                                                       name="operationName" class="form-control"
+                                                                       value="{{ machine.name }}" tabindex="-1"
+                                                                       required>
+                                                            </div>
+
+                                                            <div class="col-12 mb-4">
+                                                                <label class="form-label" for="operationArea">سالن محل
+                                                                    استفاده</label>
+                                                                <select name="operationArea" id="operationArea"
+                                                                        class="form-control">
+                                                                    <option value="">سالن را انتخاب کنید</option>
+                                                                    {% for department in departments %}
+                                                                        <option value="{{ department.id }}"
+                                                                                {% if machine.area == department %}selected{% endif %}>{{ department.name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-12 mb-4">
+                                                                <label class="form-label" for="operationStation">ایستگاه
+                                                                    محل استقرار</label>
+                                                                <select name="operationStation" id="operationStation"
+                                                                        class="form-control">
+                                                                    <option value="">ایستگاه را انتخاب کنید</option>
+                                                                    {% for station in stations %}
+                                                                        <option value="{{ station.id }}"
+                                                                                {% if machine.station == station %}selected{% endif %}>{{ station.name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="col-12 text-center">
+                                                                <button type="submit"
+                                                                        class="btn btn-primary me-sm-3 me-1">ویرایش
+                                                                </button>
+                                                                <button type="reset" class="btn btn-label-secondary"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close">
+                                                                    انصراف
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                        <!--/ Edit role form -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if user.is_superuser %}
+                                        <a href="javascript:;" data-bs-toggle="modal"
+                                           data-bs-target="#deleteTaskModal_{{ machine.id }}"
+                                           class="role-edit-modal text-danger btn btn-sm btn-icon">
+                                            <i class="bx bx-trash"></i>
+                                        </a>
+                                        <div class="modal fade" id="deleteTaskModal_{{ machine.id }}" tabindex="-1"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+                                                <div class="modal-content">
+                                                    <button type="button" class="btn-close btn-pinned"
+                                                            data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    <div class="modal-body">
+                                                        <div class="text-center mb-4">
+                                                            <h3 class="role-title">آیا میخواهید قطعه حذف شود؟</h3>
+                                                        </div>
+                                                        <form method="post" class="row g-3"
+                                                              action="{% url 'archive-operation' machine.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="col-12 text-center">
+                                                                <button type="submit"
+                                                                        class="btn btn-danger me-sm-3 me-1">
+                                                                    بله
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination justify-content-center">
+                    {% if is_paginated %}
+                        <div class="card-footer">
+                            <div style="text-align: center;">
+
+                                {% if page_obj.has_previous %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#" data-num="1">اولین
+                                        صفحه</a>
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.previous_page_number }}">قبلی</a>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <a class="btn btn-primary btn-sm  paging" href="#"
+                                           data-num="{{ num }}">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                           data-num="{{ num }}">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.next_page_number }}">بعدی</a>
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.paginator.num_pages }}">
+                                        آخرین صفحه</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>ماشینی ساخته نشده است</p>
+    {% endif %}
+
+{% endblock content %}

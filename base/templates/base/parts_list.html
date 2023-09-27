@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+{% block content %}
+
+    <div class="d-flex justify-content-between mb-2">
+        <h4 class="breadcrumb-wrapper mb-0">لیست قطعات ماشین ها</h4>
+        <input type="hidden" id="create_for_value" value="{{ create_for }}">
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success h-25 align-self-center" data-bs-toggle="modal"
+                data-bs-target="#modalCenter" id="createNewPart">
+            افزودن
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title secondary-font" id="modalCenterTitle">ساخت قطعه جدید</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'machine_part_add' %}" method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col mb-3">
+                                    <label for="nameWithTitle" class="form-label">نام</label>
+                                    <input type="text" id="nameWithTitle" name="part_name" class="form-control"
+                                           placeholder="نام قطعه">
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col mb-0">
+                                    <label for="emailWithTitle" class="form-label">ماشین</label>
+                                    <select name="machine" id="" class="form-control">
+                                        {% for machine in machines %}
+                                            <option value="{{ machine.id }}"
+                                                    {% if create_for == machine.name %}selected{% endif %}>{{ machine.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">ایجاد</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+    {% if part_list %}
+        <div class="card">
+            <div class="card-datatable table-responsive">
+                <table class="table border-top text-center table-striped">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>نام فطعه</th>
+                        <th>نام ماشین</th>
+                        <th>عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for part in part_list %}
+                        <tr>
+                            <td>{{ part.name }}</td>
+                            <td>{{ part.machine.name }}</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    {% if perms.base.change_task %}
+                                        <a href="{% url 'machine_part_edit' part.id %}" class="btn btn-sm btn-icon">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if user.is_superuser %}
+                                        <a href="javascript:;" data-bs-toggle="modal"
+                                           data-bs-target="#deleteTaskModal_{{ part.id }}"
+                                           class="role-edit-modal text-danger btn btn-sm btn-icon">
+                                            <i class="bx bx-trash"></i>
+                                        </a>
+                                        <div class="modal fade" id="deleteTaskModal_{{ part.id }}" tabindex="-1"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+                                                <div class="modal-content">
+                                                    <button type="button" class="btn-close btn-pinned"
+                                                            data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    <div class="modal-body">
+                                                        <div class="text-center mb-4">
+                                                            <h3 class="role-title">آیا میخواهید قطعه حذف شود؟</h3>
+                                                        </div>
+                                                        <form method="post" class="row g-3"
+                                                              action="{% url 'archive-part' part.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="col-12 text-center">
+                                                                <button type="submit"
+                                                                        class="btn btn-danger me-sm-3 me-1">
+                                                                    بله
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination justify-content-center">
+                    {% if is_paginated %}
+                        <div class="card-footer">
+                            <div style="text-align: center;">
+
+                                {% if page_obj.has_previous %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#" data-num="1">اولین
+                                        صفحه</a>
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.previous_page_number }}">قبلی</a>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <a class="btn btn-primary btn-sm  paging" href="#"
+                                           data-num="{{ num }}">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                           data-num="{{ num }}">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.next_page_number }}">بعدی</a>
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.paginator.num_pages }}">
+                                        آخرین صفحه</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>قطعه ای ساخته نشده است</p>
+    {% endif %}
+    <script>
+        window.onload = function () {
+            let createFor = document.getElementById('create_for_value')
+            if (createFor.value !== 'None') {
+                let modalBtn = document.getElementById('createNewPart')
+                modalBtn.click()
+            }
+        }
+    </script>
+{% endblock content %}

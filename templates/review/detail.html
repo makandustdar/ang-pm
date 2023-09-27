@@ -1,0 +1,118 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h4 class="py-3 breadcrumb-wrapper mb-2">مشاهده بازدیدها</h4>
+
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="alert alert-danger">{{ message }}</div>
+{% else %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endif %}
+{% endfor %}
+
+<div class="card">
+    <div class="card-body">
+        <!-- View Review Details -->
+        <div class="row g-3">
+            <div class="d-flex" style="justify-content: space-between;">
+                <h4>جزئیات درخواست بازدید</h4>
+                <button href="#" data-bs-target="#reviewTaskAdd" data-bs-toggle="modal"
+                    class="btn btn-label-primary">ثبت
+                    بازدید جدید</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <td colspan="2">درخواست کننده : <b>{{ review.user.profile }}</b></td>
+                        <td colspan="2">تاریخ درخواست : <b>{{ review.createdAt|to_jalali:"%y/%m/%d" }}</b></td>
+                    </tr>
+                    <tr>
+                        <td>دستگاه : <b>{{ review.machineName }}</b></td>
+                        <td>قطعه : <b>{{ review.partName }}</b></td>
+                        <td>دوره بازدید : <b>{{ review.reviewCount }} {{ review.get_reviewPeriod }}</b></td>
+                    </tr>
+                </table>
+            </div>
+
+            {% if review.reviewtask_set.all %}
+            <div class="table-responsive">
+                <h4>لیست بازدید های انجام شده</h4>
+                <table class="table table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>شرح فعالیت</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in review.reviewtask_set.all %}
+                        <tr>
+                            <td>{{ task.createdAt|to_jalali:'%y/%m/%d' }}</td>
+                            <td>
+                                <input type="text" class="form-control" name="description"
+                                    id="description_{{ task.id }}" value="{{ task.description }}" disabled>
+                            </td>
+                            <td>
+                                <select name="done" id="done_{{ task.id }}" class="form-select" disabled>
+                                    <option value="1" {% if task.done %} selected {% endif %}>انجام شده</option>
+                                    <option value="0" {% if not task.done %} selected {% endif %}>انجام نشده</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button data-id="{{ task.id }}" data-function="edit"
+                                    class="btn btn-sm btn-icon reviewTaskEditBtn">
+                                    <i class="bx bx-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">بازدیدی انجام نشده است</div>
+            {% endif %}
+        </div>
+        <!--/ View Review Details -->
+    </div>
+</div>
+
+<div class="modal fade" id="reviewTaskAdd" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+        <div class="modal-content p-3 p-md-5">
+            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-body">
+                <h4>افزودن بازدید جدید</h4>
+                <form action="{% url 'reviewtask_add' review.id %}" method="post">
+                    {% csrf_token %}
+
+                    <div class="col-md-4">
+                        <label for="" class="form-label">وضعیت</label>
+                        <select class="form-select" name="done" id="">
+                            <option value="1">انجام شد</option>
+                            <option value="0">انجام نشد</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-2">
+                        <label class="form-label">توضیحات</label>
+                        <textarea class="form-control" name="description" id="" cols="30" rows="3"></textarea>
+                    </div>
+
+                    <div class="col-md-12" style="text-align: left;">
+                        <button type="submit" class="btn btn-label-primary">ثبت</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

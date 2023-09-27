@@ -1,0 +1,280 @@
+{% extends '../base.html' %}
+{% load common %}
+
+{% load static %}
+{% load jalali_tags %}
+{% load seconds_to_time %}
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">لیست درخواست شروع به کار</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-header border-bottom">
+            <h5 class="card-title">فیلتر جستجو</h5>
+            <a href="{% url 'tasks_list' %}?year=1401">
+                <button class="btn btn-primary">1401</button>
+            </a>
+            <a href="{% url 'tasks_list' %}?year=1402">
+                <button class="btn btn-primary">1402</button>
+            </a>
+            <form action="{% url 'tasks_list' %}">
+                <div class="row">
+                      <div class="col-12">
+                        <div class="row g-3">
+                    <div class="col-12 col-sm-6 col-lg-4 user_role">
+                        <label for="departmentfield">
+                            جستجو براساس شماره درخواست
+                        </label>
+                        <input class="form-control" type="search" name="q" placeholder="401000..."
+                               value="{{ request.GET.q }}">
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4 user_plan">
+                        <label for="departmentfield">
+                            دپارتمان
+                        </label>
+                        <select class="select2 form-select" name="department" id="departmentfield">
+                            <option value="">انتخاب واحد</option>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}"
+                                        {% if request.GET.department|add:0 == department.id %}
+                                        selected {% endif %}>{{ department.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4 order_status">
+                        <label for="statusfield">
+                            وضعیت
+                        </label>
+                        <div class="select2-success">
+                            <select class="select2 form-select" name="status" id="" multiple>
+                                <option value="">وضعیت</option>
+                                {% for key, text in status_choices %}
+                                    <option value="{{ key }}"
+                                            {% for status in request.GET|get_list:'status' %}
+                                                {% if status == key %}
+                                            selected
+                                                {% endif %}
+                                            {% endfor %}>
+                                        {{ text }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4 user_plan">
+                        <label for="operationfield">
+                            عملیات
+                        </label>
+                        <select class="select2 form-select" name="operation" id="operationfield">
+                            <option value="">انتخاب عملیات</option>
+                            {% for operation in operations %}
+                                <option value="{{ operation.id }}"
+                                        {% if request.GET.operation|add:0 == operation.id %}
+                                        selected {% endif %}>{{ operation.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-4 user_plan">
+                        <label for="operationfield">
+                            اپراتور فنی
+                        </label>
+                        {#                        <select class="select2 form-select" name="operator" id="operationfield">#}
+                        {#                            <option value="">انتخاب اپراتور</option>#}
+                        {#                        {% for operator in operators %}#}
+                        {#                            <option value="{{ operator.id }}"#}
+                        {#                                    {% if request.GET.operator|add:0 == operator.id %}#}
+                        {#                                    selected {% endif %}>{{ operator.get_full_name }}</option>#}
+                        {#                        {% endfor %}#}
+                        {#                        </select>#}
+                        <div class="select2-success">
+                            {#                            {% for operatorinrequest in request.GET|get_list:'operator' %}#}
+                            {#                            {% for operator in operators %}#}
+                            {#                                    {{ operatorinrequest }}#}
+                            {#                                    {{ operatorinrequest }}#}
+                            {#                                    {{ operator.id }}#}
+                            {#                                    {% if operatorinrequest == operator.id %}#}
+                            {#                                        {{ operatorinrequest }}#}
+                            {#                                    {% endif %}#}
+                            {#                            {% endfor %}#}
+                            {#                            {% endfor %}#}
+                            <select class="select2 form-select" name="operator" id="" multiple>
+                                <option value="">اپراتور</option>
+                                {% for operator in operators %}
+                                    <option value="{{ operator.id }}"
+                                            {% includes request.GET|get_list:'operator' operator.id as selected %}
+                                            {% if selected %}
+                                            selected
+                                            {% endif %}
+                                    >
+                                        {{ operator.get_full_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4 order_status">
+                        <label for="dt_date">تاریخ</label>
+                        <input type="text" id="dt_date" class="form-control dt-date flatpickr-range dt-input"
+                               data-column="5"
+                               placeholder="تاریخ شروع تا پایان" data-column-index="4" name="dt_date"
+                               value="{{ request.GET.dt_date }}">
+                        <input type="hidden" class="form-control dt-date start_date dt-input" data-column="5"
+                               data-column-index="4" name="value_from_start_date">
+                        <input type="hidden" class="form-control dt-date end_date dt-input" name="value_from_end_date"
+                               data-column="5" data-column-index="4">
+                    </div>
+                     </div>
+                      </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 user_status">
+                        <button type="submit" class="btn btn-label-primary">اعمال فیلتر</button>
+                        <button type="button" class="btn btn-danger">
+                            <a href="{% url 'tasks_list' %}" class="text-white">حذف فیلتر ها</a>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-datatable table-responsive">
+            <table class="table border-top text-center table-striped">
+                <thead class="table-dark">
+                <tr>
+                    <th>شماره سفارش</th>
+                    <th>نام مجری</th>
+                    <th>اپراتور فنی</th>
+                    <th>شرح فعالیت</th>
+                    <th>شرح لوازم مصرفی</th>
+                    <th>تاریخ</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.order.orderId }}</td>
+                        <td>{{ task.user.profile }}</td>
+                        <td>
+                            {% for operator in task.operators.all %}
+                                {{ operator.get_full_name }}
+                                {% if not forloop.last %}
+                                    |
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ task.description|truncatewords:"10" }}</td>
+                        <td>{{ task.description2|truncatewords:"10" }}</td>
+                        <td>{{ task.date|to_jalali:'%y/%m/%d' }}</td>
+                        <td>{{ task.get_status_display }}</td>
+                        {#                        <td>{% if task.completed %}#}
+                        {#                            <span class="badge bg-label-success">کامل</span>#}
+                        {#                        {% else %}#}
+                        {#                            <span class="badge bg-label-danger">ناقص</span>#}
+                        {#                        {% endif %}#}
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                {% if perms.base.change_task %}
+                                    <a href="{% url 'task_edit' task.id %}" class="btn btn-sm btn-icon">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-icon">
+                                    <i class="bx bx-show"></i>
+                                </a>
+                                {% if user.is_superuser %}
+                                    <a href="javascript:;" data-bs-toggle="modal"
+                                       data-bs-target="#deleteTaskModal_{{ task.id }}"
+                                       class="role-edit-modal text-danger">
+                                        <i class="bx bx-trash"></i>
+                                    </a>
+                                    <div class="modal fade" id="deleteTaskModal_{{ task.id }}" tabindex="-1"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered modal-add-new-role">
+                                            <div class="modal-content p-3 p-md-5">
+                                                <button type="button" class="btn-close btn-pinned"
+                                                        data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                <div class="modal-body">
+
+                                                    <div class="text-center mb-4">
+                                                        <h3 class="role-title">آیا میخواهید درخواست مربوط با کار حذف
+                                                            شود؟</h3>
+                                                    </div>
+                                                    <form method="post" class="row g-3"
+                                                          action="{% url 'archive-task' task.id %}">
+                                                        {% csrf_token %}
+                                                        <div class="col-12 text-center">
+                                                            <button type="submit" name="type_of_delete"
+                                                                    value="delete_all"
+                                                                    class="btn btn-danger me-sm-3 me-1">
+                                                                بله
+                                                            </button>
+                                                            <button type="submit" name="type_of_delete"
+                                                                    value="delete_this" class="btn btn-primary">
+                                                                خیر
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="d-flex m-3 col-4 justify-content-around">
+                <p>مدت زمان کار انجام شده:</p>
+                <p>
+                    {% seconds_to_time time_spent %}
+                </p>
+            </div>
+            <div class="pagination justify-content-center">
+                {% if is_paginated %}
+                    <div class="card-footer">
+                        <div style="text-align: center;">
+
+                            {% if page_obj.has_previous %}
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#" data-num="1">اولین صفحه</a>
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                   data-num="{{ page_obj.previous_page_number }}">قبلی</a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <a class="btn btn-primary btn-sm  paging" href="#"
+                                       data-num="{{ num }}">{{ num }}</a>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ num }}">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                   data-num="{{ page_obj.next_page_number }}">بعدی</a>
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                   data-num="{{ page_obj.paginator.num_pages }}">
+                                    آخرین صفحه</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

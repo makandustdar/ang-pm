@@ -1,0 +1,91 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+
+{% block content %}
+
+<h4 class="py-3 breadcrumb-wrapper mb-2">لیست بازدید ها</h4>
+
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="alert alert-danger">{{ message }}</div>
+{% else %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endif %}
+{% endfor %}
+
+<div class="card">
+    <div class="card-header border-bottom">
+        <h5 class="card-title">فیلتر جستجو</h5>
+        <form action="{% url 'review_list' %}">
+            <div class="d-flex justify-content-between align-items-center row py-3 gap-3 gap-md-0">
+                <div class="col-md-3 user_role">
+                    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}"
+                        placeholder="جستجو براساس نام درخواست کننده">
+                </div>
+                <div class="col-md-3 user_plan">
+                    <select class="form-select" name="machine" id="">
+                        <option value="">انتخاب دستگاه</option>
+                        {% for machine in machines %}
+                        <option value="{{ machine.id }}" {% if request.GET.machine|add:0 == machine.id %} selected
+                            {% endif %}>{{ machine.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 order_status">
+                    <select class="form-select" name="part" id="">
+                        <option value="">انتخاب قطعه</option>
+                        {% for part in parts %}
+                        <option value="{{ part.id }}" {% if request.GET.part|add:0 == part.id %} selected {% endif %}>
+                        </option>
+                        {{ part.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 user_status">
+                    <button type="submit" class="btn btn-label-primary">اعمال فیلتر</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card-datatable table-responsive">
+        <table class="table border-top text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>نام درخواست دهنده</th>
+                    <th>دستگاه</th>
+                    <th>قطعه</th>
+                    <th>تاریخ ایجاد</th>
+                    <th>عمل‌ها</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ review.user.profile }}</td>
+                    <td><span class="badge bg-label-primary">{{ review.machineName }}</span></td>
+                    <td><span class="badge bg-label-success">{{ review.partName }}</span></td>
+                    <td>{{ review.createdAt|to_jalali:'%y/%m/%d' }}</td>
+                    </td>
+                    <td>
+                        <div class="d-inline-block text-nowrap">
+                            {% if perms.base.change_review %}
+                            <a href="{% url 'review_edit' review.id %}" class="btn btn-sm btn-icon">
+                                <i class="bx bx-edit"></i>
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'review_detail' review.id %}" class="btn btn-sm btn-icon delete-record">
+                                <i class="bx bx-show"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

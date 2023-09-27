@@ -1,0 +1,36 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h4 class="py-3 breadcrumb-wrapper mb-2">ویرایش درخواست بازدید دوره ای</h4>
+
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="alert alert-danger">{{ message }}</div>
+{% else %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endif %}
+{% endfor %}
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-3 mb-2">{{ form.machine|as_crispy_field }}</div>
+                <div class="col-md-3 mb-2">{{ form.part|as_crispy_field }}</div>
+                <div class="col-md-3 mb-2">{{ form.reviewPeriod|as_crispy_field }}</div>
+                <div class="col-md-3 mb-2">{{ form.reviewCount|as_crispy_field }}</div>
+            </div>
+            <div class="mt-1">
+                <button type="submit" class="btn btn-primary me-2">ویرایش</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% endblock content %}

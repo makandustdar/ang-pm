@@ -1,0 +1,263 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">ثبت درخواست شروع به کار</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <tr>
+                <td>درخواست کننده : <b>{{ order.user.profile }}</b></td>
+                <td>شماره درخواست : <b>{{ order.orderId }}</b></td>
+                <td>تاریخ درخواست :
+                    <b>{{ order.createdAt|to_jalali:'%y/%m/%d' }}</b>
+                </td>
+            </tr>
+            <tr>
+                <td>واحد : <b>{{ order.departmentName }}</b></td>
+                <td>زیرگروه :
+                    {% for sub in order.subGroup.all %}
+                        <b>{{ sub.name }}</b>
+                    {% endfor %}
+                </td>
+                <td>عملیات : <b>{{ order.operationName }}</b></td>
+            </tr>
+            <tr>
+                <td colspan="3">شرح درخواست :
+                    <b>{{ order.description|safe }}</b>
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% if tasks %}
+        <div class="row my-3">
+            <h3 class="m-0">لیست کارهای انجام شده</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered text-center">
+                    <thead>
+                    <tr>
+                        <th>نام مجری</th>
+                        <th>شرح فعالیت</th>
+                        <th>شرح لوازم مصرفی</th>
+                        <th>تاریخ</th>
+                        <th>ساعت شروع</th>
+                        <th>ساعت پایان</th>
+                        <th>وضعیت</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.user.profile }}</td>
+                            <td>{{ task.description }}</td>
+                            <td>{{ task.description2 }}</td>
+                            <td>{{ task.date|to_jalali:'%y/%m/%d' }}</td>
+                            <td dir="ltr">{{ task.start_time|time:'h:i A' }}</td>
+                            <td dir="ltr">{{ task.end_time|time:'h:i A' }}</td>
+                            <td>
+                                <span class="badge bg-label-success">
+                                    {{ task.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="text-center">
+                    <h3 class="m-0">افزودن اطلاعات کار</h3>
+                </div>
+                <div class="modal fade" id="addPartModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title secondary-font" id="exampleModalLabel1">افزودن قطعه</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <form action="{% url 'machine_part_add' %}" method="post">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col mb-3">
+                                            <label for="nameBasic" class="form-label">نام</label>
+                                            <input type="text" id="nameBasic" name="part_name"
+                                                   class="form-control"
+                                                   placeholder="نام قطعه را وارد کنید">
+                                            <input type="hidden" value="{{ order.operationName }}" name="machine">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="reset" class="btn btn-label-secondary"
+                                            data-bs-dismiss="modal">
+                                        بستن
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">افزودن</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+                <form class="form-repeater" onsubmit="deleteCookies()" method="post" action="{% url 'task_add' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="orderId" value="{{ request.GET.orderId }}">
+                    <div class="col-12 mb-2">
+                        <label class="form-label">شرح فعالیت</label>
+                        <textarea id="autosize-demo-description" name="description" rows="3" class="form-control"
+                                  required
+                                  style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 107px;"
+                                  onchange="saveToCookie()">{{ task.description }}</textarea>
+                    </div>
+                    <hr>
+                    <div class="col-12 my-4">
+                        <p>شرح لوازم مصرفی</p>
+                        <table id="usable_stuff_table" class="table table-bordered d-none my-3">
+                            <thead>
+                            <tr>
+                                <th>نام</th>
+                                <th>تعداد</th>
+                                <th class="w-px-20">عملیات</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <input type="hidden" id="inputforback" name="stuff_items">
+                        <div class="d-flex gap-4">
+                            <label for="" class="form-label align-self-center">نام</label>
+                            <select name="pieces" id="name_of_thing" class="form-select">
+                                {% for part in parts %}
+                                    <option value="{{ part.name }}">{{ part.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="" class="form-label align-self-center">تعداد</label>
+                            <input type="number" class="form-control w-50" id="count_of_thing">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="create_row()">افزودن
+                            </button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPartModal">
+                            افزودن قطعه جدید
+                        </button>
+                    </div>
+                    <div class="row">
+                        <!-- Date Picker-->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label for="flatpickr-date" class="form-label">تاریخ<span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="date" placeholder="YYYY/MM/DD"
+                                   id="flatpickr-date">
+                        </div>
+                        <!-- /Date Picker -->
+                        <!-- Time Picker-->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label for="flatpickr-time" class="form-label">ساعت شروع<span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="start_time" placeholder="HH:MM"
+                                   id="flatpickr-time1" data-enable-time=true data-time_24hr=true>
+                        </div>
+                        <!-- /Time Picker -->
+                        <!-- Time Picker-->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label for="flatpickr-time" class="form-label">ساعت پایان<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="end_time" placeholder="HH:MM"
+                                   id="flatpickr-time2" data-enable-time=true data-time_24hr=true>
+                        </div>
+                        <!-- /Time Picker -->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label class="form-label">وضعیت<span class="text-danger">*</span></label>
+                            <select class="form-select" name="status" id="">
+                                <option value="">وضعیت</option>
+                                {% for key, text in status_choices %}
+                                    <option value="{{ key }}" {% if task.order.status == key %} selected {% endif %}>
+                                        {{ text }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-12 mb-4">
+                            <label class="form-label">اپراتور فنی<span class="text-danger">*</span></label>
+                            <select class="select2 form-select" name="operator" id="select2Success" multiple required>
+                                {% for operator in operators %}
+                                    <option value={{ operator.id }}>{{ operator.get_full_name }} {{ operator.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-1">
+                        <button type="submit" class="btn btn-primary me-2" style="float: left;">ثبت</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        {#let descriptionElement = document.getElementById('autosize-demo-description')#}
+        {#window.onunload = function () {#}
+        {#    deleteCookie('description')#}
+        {##}
+        {#function deleteCookie(name) {#}
+        {#    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';#}
+        {##}
+        {#function deleteCookies() {#}
+        {#    deleteCookie('description')#}
+        {##}
+        {#function getCookie(name) {#}
+        {#    const value = `; ${document.cookie}`;#}
+        {#    const parts = value.split(`; ${name}=`);#}
+        {#    if (parts.length === 2) return parts.pop().split(';').shift();#}
+        {##}
+        {#function saveToCookie() {#}
+        {#    document.cookie = `description=${descriptionElement.value};path=/;`#}
+        {##}
+        {#let description_value = getCookie('description')#}
+        {#if (description_value) {#}
+        {#    descriptionElement.value = description_value#}
+
+        function create_row() {
+            let name = document.getElementById('name_of_thing').value
+            let count = document.getElementById('count_of_thing').value
+            document.getElementById('usable_stuff_table').classList.remove('d-none')
+            let tbodyRef = document.getElementById('usable_stuff_table').getElementsByTagName('tbody')[0];
+            let newRow = tbodyRef.insertRow();
+
+            let nameCell = newRow.insertCell();
+            let countCell = newRow.insertCell();
+            let trashCell = newRow.insertCell();
+
+            let newName = document.createTextNode(name);
+            let newCount = document.createTextNode(count);
+            let newTrash = document.createElement('i');
+            newTrash.classList.add("bx", "bx-trash", "btn-label-danger", 'rounded', 'text-end')
+            newTrash.id = `trash_icon_${name}${count}`
+            trashCell.style.textAlign = 'center'
+            nameCell.appendChild(newName);
+            countCell.appendChild(newCount);
+            trashCell.appendChild(newTrash);
+            document.getElementById('name_of_thing').value = ''
+            document.getElementById('count_of_thing').value = ''
+            document.getElementById('inputforback').value += `${name},${count}|`
+        }
+    </script>
+{% endblock content %}

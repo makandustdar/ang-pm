@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load jalali_tags %}
+{% load seconds_to_time %}
+{% load task_time %}
+{% block content %}
+    <h4 class="py-3 breadcrumb-wrapper mb-2">گزارش افراد</h4>
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+    <div class="card">
+        <div class="card-header border-bottom">
+            <h5 class="card-title">فیلتر جستجو</h5>
+            <form action="{% url 'machines_report' %}">
+                <div class="d-flex align-items-center row py-3 gap-3 gap-md-0">
+                    <div class="col-md-3 order_status">
+                        <label for="operation_name">نام دستگاه</label>
+                        <select class="select2 form-select" name="operation" id="operation_name">
+                            <option value="">عملیات درخواستی</option>
+                            {% for operation in all_operations %}
+                                <option value="{{ operation.name }}" {% if request.GET.operation == operation.name %}
+                                        selected
+                                {% endif %}>{{ operation.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 order_status">
+                        <label for="time_spent">مرتب سازی بر اساس</label>
+                        <select class="select2 form-select" name="time_spent" id="time_spent">
+                            <option value="highest" {% if request.GET.time_spent == 'highest' %}selected{% endif %}>
+                                بیشترین زمان
+                            </option>
+                            <option value="lowest" {% if request.GET.time_spent == 'lowest' %}selected{% endif %}>
+                                کمترین زمان
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 user_status " style="text-align: right;">
+                        <button type="submit" class="btn btn-label-primary">اعمال فیلتر</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% if operation_list %}
+            <div class="card-datatable table-responsive">
+                <table class="table border-top text-center table-striped">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>نام دسنگاه</th>
+                        <th>مدت زمان</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for operation in operation_list %}
+{#                        {% total_task_time operation.order.all as total_seconds %}#}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'orders_list' %}?operation={{ operation.id }}">{{ operation.name }}</a>
+                            </td>
+                            <td>
+                                {{ operation.time_spent|translate_day }}
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination justify-content-center">
+                    {% if is_paginated %}
+                        <div class="card-footer">
+                            <div style="text-align: center;">
+                                {% if page_obj.has_previous %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#" data-num="1">اولین
+                                        صفحه</a>
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.previous_page_number }}">قبلی</a>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <a class="btn btn-primary btn-sm  paging" href="#"
+                                           data-num="{{ num }}">{{ num }}</a>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                           data-num="{{ num }}">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.next_page_number }}">بعدی</a>
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ page_obj.paginator.num_pages }}">
+                                        آخرین صفحه</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock content %}

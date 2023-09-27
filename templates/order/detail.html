@@ -1,0 +1,91 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">مشاهده درخواست</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><b> درخواست کننده : </b> {{ order.user.profile }}</td>
+                            <td><b> شماره درخواست :</b> {{ order.orderId }}</td>
+                            <td><b>تاریخ درخواست :</b>
+                                {{ order.createdAt|to_jalali:'%y/%m/%d' }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b> واحد :</b> {{ order.departmentName }}</td>
+                            <td>زیرگروه :
+                                {% for sub in order.subGroup.all %}
+                                    {{ sub.name }}
+                                {% endfor %}
+                            </td>
+                            <td><b>عملیات :</b>{{ order.operationName }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>شرح درخواست</b></td>
+                            <td colspan="2">{{ order.description|safe }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <h4>لیست کارهای انجام شده</h4>
+        {% for task in order.task.all|dictsort:"date" %}
+            <table class="table table-bordered text-center mb-4">
+                <tr>
+                    <td colspan="4"><b> نام مجری :</b> {{ task.user.profile }}</td>
+                </tr>
+                <tr>
+                    <td rowspan="4" {% if task.completed %} class="bg-label-success" {% else %}
+                        class="bg-label-danger" {% endif %}>
+                        <b> تاریخ : </b> {{ task.date|to_jalali:'%y/%m/%d' }}
+                    </td>
+                    <td><b>ساعت شروع : </b>
+                        <dir
+                        ="ltr">{{ task.start_time|time:'h:i A' }}</td>
+                    <td><b>ساعت پایان : </b>
+                        <dir
+                        ="ltr">{{ task.end_time|time:'h:i A' }}</b></td>
+                    <td><b>وضعیت : </b> {% if task.completed %}
+                        <span class="badge bg-label-success">کامل</span>
+                    {% else %}
+                        <span class="badge bg-label-danger">ناقص</span>
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>شرح فعالیت </b></td>
+                    <td colspan="3" style="text-align: justify;">{{ task.description }}</td>
+                </tr>
+                <tr>
+                    <td><b>شرح لوازم مصرفی </b></td>
+                    <td colspan="3" style="text-align: justify;">{{ task.description2 }}</td>
+                </tr>
+            </table>
+        {% endfor %}
+    </div>
+    </div>
+    <!--/ View Order Details -->
+    </div>
+    </div>
+
+
+{% endblock content %}

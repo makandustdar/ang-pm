@@ -1,0 +1,88 @@
+from django.contrib.auth.models import User
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h4 class="py-3 breadcrumb-wrapper mb-2">ویرایش کاربر</h4>
+
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="alert alert-danger">{{ message }}</div>
+{% else %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endif %}
+{% endfor %}
+
+<div class="card">
+    <div class="card-body">
+        <form id="formValidationExamples" action="{% url 'user_edit' user.username %}" method="post">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-3 mb-1">
+                    <label for="" class="form-label">نام*</label>
+                    <input class="form-control" type="text" name="fname" value="{{ user.first_name }}" required>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label for="" class="form-label">نام خانوادگی*</label>
+                    <input class="form-control" type="text" name="lname" value="{{ user.last_name }}" required>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label for="" class="form-label">نام کاربری*</label>
+                    <input class="form-control" type="text" name="username" value="{{ user.username }}" required>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label for="" class="form-label">نقش*</label>
+                    <select class="form-select" name="role" id="" required>
+                        {% for role in roles %}
+                        <option value="{{ role.id }}" {% if user.groups.first.id == role.id %} selected {% endif %}>
+                            {{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label for="" class="form-label">واحد*</label>
+                    <select class="select2 form-select form-select-lg" data-allow-clear="true" name="department" required>
+                        {% for department in departments %}
+                        <option value="{{ department.id }}" {% if user.profile.department.id == department.id %}
+                            selected {% endif %}>{{ department.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label for="" cass="form-label">شماره همراه</label>
+                    <input class="form-control" type="text" name="mobile" value="{{ user.profile.mobileNumber }}"
+                        required>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label for="" class="form-label">ایمیل</label>
+                    <input class="form-control" type="text" name="email" value="{{ user.email }}">
+                </div>
+
+                <div class="col-md-3 mb-1">
+                    <div class="mb-3 form-password-toggle">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label" for="password">رمز عبور*</label>
+                        </div>
+                        <div class="input-group input-group-merge">
+                            <input type="password" id="password" class="form-control text-start" dir="ltr"
+                                name="password" placeholder="············" aria-describedby="password">
+                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="mt-1">
+                <button type="submit" class="btn btn-primary me-2">ثبت</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+{% endblock content %}

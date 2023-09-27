@@ -1,0 +1,94 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">ایجاد کاربر</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <script>
+        function handleShowUnit() {
+            const options = document.getElementById('roleoption');
+            const unit =  document.getElementById('unitoption');
+            const value = options.value;
+            const text = options.options[options.selectedIndex].text;
+            if (text==='اپراتور فنی'){
+                unit.style.display = 'none'
+            }
+        }
+    </script>
+
+
+    <div class="card">
+        <div class="card-body">
+            <form id="formValidationExamples" action="{% url 'user_add' %}" method="post">
+                {% csrf_token %}
+                <div class="row g-4">
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">نام*</label>
+                        <input class="form-control" type="text" name="fname" id="" placeholder="نام" required>
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">نام خانوادگی*</label>
+                        <input class="form-control" type="text" name="lname" id="" placeholder="نام خانوادگی" required>
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">نام کاربری*</label>
+                        <input class="form-control" type="text" name="username" id="" placeholder="نام کاربری" required>
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">نقش*</label>
+                        <select class="form-select" name="role" onchange="handleShowUnit()" id="roleoption" required>
+                            {% for role in roles %}
+                                <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-1" id="unitoption">
+                        <label for="" class="form-label">واحد*</label>
+                        <select class="select2 form-select form-select-lg" data-allow-clear="true" name="department"
+                                required>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}">{{ department.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">شماره همراه</label>
+                        <input class="form-control" type="text" name="mobile" id="" placeholder="شماره همراه">
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">ایمیل</label>
+                        <input class="form-control" type="text" name="email" id="" placeholder="ایمیل">
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <div class="mb-3 form-password-toggle">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="password">رمز عبور*</label>
+                            </div>
+                            <div class="input-group input-group-merge">
+                                <input type="password" id="password" class="form-control text-start" dir="ltr"
+                                       name="password" placeholder="············" aria-describedby="password" required>
+                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-1">
+                    <button type="submit" class="btn btn-primary me-2">ثبت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+{% endblock content %}
+

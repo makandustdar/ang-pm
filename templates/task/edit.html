@@ -1,0 +1,94 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load jalali_tags %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">ویرایش درخواست شروع به کار</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <form class="form-repeater" method="post" action="{% url 'task_edit' task.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="orderId" value="{{ request.GET.orderId }}">
+                    <div class="col-12 mb-2">
+                        <label class="form-label">شرح فعالیت</label>
+                        <textarea id="autosize-demo" name="description" rows="3" class="form-control" required
+                                  style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 107px;">{{ task.description }}</textarea>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="form-label">شرح لوازم مصرفی</label>
+                        <textarea id="autosize-demo" name="description2" rows="3" class="form-control" required
+                                  style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 107px;">{{ task.description2 }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <!-- Date Picker-->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label for="flatpickr-date" class="form-label">تاریخ</label>
+                            <input type="text" class="form-control" name="date"
+                                   value="{{ task.date|to_jalali:'%Y-%m-%d' }}"
+                                   placeholder="YYYY/MM/DD" id="flatpickr-date">
+                        </div>
+                        <!-- /Date Picker -->
+                        <!-- Time Picker-->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label for="flatpickr-time" class="form-label">ساعت شروع</label>
+                            <input type="text" class="form-control" value="{{ task.start_time }}" name="start_time"
+                                   placeholder="HH:MM" id="flatpickr-time1"  data-enable-time=true data-time_24hr=true>
+                        </div>
+                        <!-- /Time Picker -->
+                        <!-- Time Picker-->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label for="flatpickr-time" class="form-label">ساعت پایان</label>
+                            <input type="text" class="form-control" value="{{ task.end_time }}" name="end_time"
+                                   placeholder="HH:MM" id="flatpickr-time2" data-enable-time=true data-time_24hr=true>
+                        </div>
+                        <!-- /Time Picker -->
+                        <div class="col-md-3 col-12 mb-4">
+                            <label class="form-label">وضعیت</label>
+                            <select class="form-select" name="status" id="">
+                                <option value="">وضعیت</option>
+                                {% for key, text in status_choices %}
+                                    <option value="{{ key }}" {% if task.status == key %} selected {% endif %}>
+                                        {{ text }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-12 mb-4">
+                            <label class="form-label">اپراتور فنی</label>
+                            <select class="form-select select2" name="operator" id="" multiple required>
+                                {% for operator in operators %}
+                                    <option value={{ operator.id }}
+                                                    {% for operator_loop in task.operators.all %}
+                                                        {% if operator_loop.id == operator.id %}
+                                                            selected
+                                                        {% endif %}
+                                                    {% endfor %}>
+                                        {{ operator.get_full_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-1">
+                        <button type="submit" class="btn btn-primary me-2" style="float: left;">ویرایش</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fa" class="light-style layout-navbar-fixed layout-menu-fixed" dir="rtl" data-theme="theme-default"
+      data-assets-path="/static/" data-template="vertical-menu-template">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title> ANG سامانه درخواست کار </title>
+
+    <meta name="description" content="">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="{% static 'vendor/fonts/boxicons.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/fonts/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/fonts/flag-icons.css' %}">
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{% static 'vendor/css/rtl/core.css' %}" class="template-customizer-core-css">
+    <link rel="stylesheet" href="{% static 'vendor/css/rtl/theme-default.css' %}" class="template-customizer-theme-css">
+    <link rel="stylesheet" href="{% static 'css/demo.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/css/rtl/rtl.css' %}">
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="{% static 'vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/libs/typeahead-js/typeahead.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/libs/flatpickr/flatpickr.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/libs/pickr/pickr-themes.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}">
+    <!-- Page CSS -->
+
+    <!-- Helpers -->
+    <script src="{% static 'vendor/js/helpers.js' %}"></script>
+
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+    <script src="{% static 'vendor/js/template-customizer.js' %}"></script>
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="{% static 'js/config.js' %}"></script>
+
+    <script type="text/javascript">
+        var user = '{{ request.user }}'
+
+        function getToken(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getToken('csrftoken');
+    </script>
+</head>
+
+<body>
+<!-- Layout wrapper -->
+<div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+        <!-- Menu -->
+
+        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+            <div class="app-brand demo">
+                <a href="#" class="app-brand-link">
+                        <span class="app-brand-logo demo">
+                            <img src="{% static 'img/logo.png' %}" alt="">
+                        </span>
+                    <span class="app-brand-text demo menu-text fw-bold ms-2">آسیا نگار </span>
+                </a>
+
+                <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+                    <i class="bx menu-toggle-icon d-none d-xl-block fs-4 align-middle"></i>
+                    <i class="bx bx-x d-block d-xl-none bx-sm align-middle"></i>
+                </a>
+            </div>
+
+            <div class="menu-divider mt-0"></div>
+
+            <div class="menu-inner-shadow"></div>
+
+            <ul class="menu-inner py-1">
+                <!-- Dashboards -->
+                <li class="menu-item {% if 'index' in request.resolver_match.url_name %} active {% endif %}">
+                    <a href="/" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                        <div data-i18n="Dashboard">داشبورد</div>
+                    </a>
+                </li>
+                {% if perms.base.view_order or perms.base.add_order %}
+                    <!-- Orders -->
+                    <li class="menu-item {% if 'order' in request.resolver_match.url_name %} open {% endif %}">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-receipt"></i>
+                            <div data-i18n="users">مدیریت درخواست ها</div>
+                        </a>
+                        <ul class="menu-sub">
+                            {% if perms.base.view_order %}
+                                <li class="menu-item {% if request.resolver_match.url_name == 'orders_list' %} active {% endif %}">
+                                    <a href="{% url 'orders_list' %}?year=1402" class="menu-link">
+                                        <div data-i18n="Orders list">لیست درخواست ها</div>
+                                    </a>
+                                </li>
+                                {% if not request.user.is_superuser %}
+                                    <li class="menu-item {% if request.resolver_match.url_name == 'orders_completed_list' %} active {% endif %}">
+                                        <a href="{% url 'orders_completed_list' %}" class="menu-link">
+                                            <div data-i18n="Orders list">لیست درخواست های تکمیل شده</div>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                            {% if perms.base.add_order %}
+                                <li
+                                        class="menu-item {% if request.resolver_match.url_name == 'order_add' %} active {% endif %}">
+                                    <a href="{% url 'order_add' %}" class="menu-link">
+                                        <div data-i18n="Order add">ایجاد درخواست</div>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
+                {% if perms.base.view_task %}
+                    <!-- Tasks -->
+                    <li class="menu-item {% if 'task' in request.resolver_match.url_name %} active {% endif %}">
+                        <a href="{% url 'tasks_list' %}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-task"></i>
+                            <div data-i18n="users">مدیریت کارها</div>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="menu-item {% if 'department' in request.resolver_match.url_name or 'operation' in request.resolver_match.url_name or 'subgroup_list' in request.resolver_match.url_name or 'machine_parts_list' in request.resolver_match.url_name  or 'station_list' in request.resolver_match.url_name %} open {% endif %}">
+                    <a href="javascript:void(0)" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons fa fa-gear"></i>
+                        <div data-i18n="users">تنظیمات</div>
+                    </a>
+                    <ul class="menu-sub">
+                        {% if perms.base.view_department %}
+                            <!-- Department -->
+                            <li class="menu-item {% if 'department' in request.resolver_match.url_name %} active {% endif %}">
+                                <a href="{% url 'department_list' %}" class="menu-link">
+                                    <div data-i18n="users">مدیریت محیط ها</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if perms.base.view_operation %}
+                            <!-- Operation -->
+                            <li class="menu-item {% if 'operation' in request.resolver_match.url_name %} active {% endif %}">
+                                <a href="{% url 'operation_list' %}" class="menu-link">
+                                    <div data-i18n="users">مدیریت ماشین ها</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if perms.base.view_part %}
+                            <!-- Parts -->
+                            <li class="menu-item {% if 'parts' in request.resolver_match.url_name %} active {% endif %}">
+                                <a href="{% url 'machine_parts_list' %}" class="menu-link">
+                                    <div data-i18n="users">مدیریت قطعات</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if perms.base.view_stuff %}
+                            <li class="menu-item {% if 'stuff_list' in request.resolver_match.url_name %} active {% endif %}">
+                                <a href="{% url 'stuff_list' %}" class="menu-link">
+                                    <div data-i18n="users">مدیریت وسایل</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if perms.base.view_station %}
+                            <!-- Parts -->
+                            <li class="menu-item {% if 'station' in request.resolver_match.url_name %} active {% endif %}">
+                                <a href="{% url 'station_list' %}" class="menu-link">
+                                    <div data-i18n="users">مدیریت ایستگاه ها</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if perms.base.view_subgroup %}
+                            <!-- SubGroup -->
+                            <li class="menu-item {% if 'subgroup' in request.resolver_match.url_name %} active {% endif %}">
+                                <a href="{% url 'subgroup_list' %}" class="menu-link">
+                                    <div data-i18n="users">مدیریت زیرگروه</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+
+                {% if request.user.is_superuser %}
+                    <!-- Users -->
+                    <li class="menu-item {% if 'machines_report' in request.resolver_match.url_name %} open {% endif %}">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bxs-report"></i>
+                            <div data-i18n="users">گزارشات</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li
+                                    class="menu-item {% if request.resolver_match.url_name == 'persons_report' %} active {% endif %}">
+                                <a href="{% url 'persons_report' %}" class="menu-link">
+                                    <div data-i18n="Users list">افراد</div>
+                                </a>
+                            </li>
+                            <li
+                                    class="menu-item {% if request.resolver_match.url_name == 'machines_report' %} active {% endif %}">
+                                <a href="{% url 'machines_report' %}" class="menu-link">
+                                    <div data-i18n="User add">دستگاه ها</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% endif %}
+                {% if perms.users.view_user or perms.users.add_user %}
+                    <!-- Users -->
+                    <li class="menu-item {% if 'user' in request.resolver_match.url_name %} open {% endif %}">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-user"></i>
+                            <div data-i18n="users">کاربران</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li
+                                    class="menu-item {% if request.resolver_match.url_name == 'users_list' %} active {% endif %}">
+                                <a href="{% url 'users_list' %}" class="menu-link">
+                                    <div data-i18n="Users list">لیست کاربران</div>
+                                </a>
+                            </li>
+                            <li
+                                    class="menu-item {% if request.resolver_match.url_name == 'user_add' %} active {% endif %}">
+                                <a href="{% url 'user_add' %}" class="menu-link">
+                                    <div data-i18n="User add">ایجاد کاربر</div>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                {% endif %}
+
+                {% if perms.auth.view_permission or perms.auth.add_permission %}
+                    <!-- Permissions -->
+                    <li class="menu-item {% if 'roles' in request.resolver_match.url_name %} active{% endif %}">
+                        <a href="{% url 'roles_list' %}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-check-shield"></i>
+                            <div data-i18n="permissions">نقش‌‌ها و دسترسی ها</div>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if perms.review.view_review or perms.users.add_review %}
+                    <!-- Review -->
+                    <li
+                            class="menu-item {% if 'review' in request.resolver_match.url_name or 'machine_list' in request.resolver_match.url_name or 'part_list' in request.resolver_match.url_name %} open {% endif %}">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-user"></i>
+                            <div data-i18n="users">بازدید دوره ای</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li
+                                    class="menu-item {% if request.resolver_match.url_name == 'review_list' %} active {% endif %}">
+                                <a href="{% url 'review_list' %}" class="menu-link">
+                                    <div data-i18n="Review list">لیست بازدیدها</div>
+                                </a>
+                            </li>
+                            <li
+                                    class="menu-item {% if request.resolver_match.url_name == 'review_add' %} active {% endif %}">
+                                <a href="{% url 'review_add' %}" class="menu-link">
+                                    <div data-i18n="User add">ایجاد بازدید</div>
+                                </a>
+                            </li>
+                            {% if perms.review.view_part %}
+                                <!-- Machine -->
+                                <li
+                                        class="menu-item {% if 'machine_list' in request.resolver_match.url_name %} active {% endif %}">
+                                    <a href="{% url 'machine_list' %}" class="menu-link">
+                                        <div data-i18n="users">مدیریت دستگاه</div>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if perms.review.view_part %}
+                                <!-- Part -->
+                                <li class="menu-item {% if 'part_list' in request.resolver_match.url_name %} active {% endif %}">
+                                    <a href="{% url 'part_list' %}" class="menu-link">
+                                        <div data-i18n="users">مدیریت قطعات</div>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </aside>
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+            <!-- Navbar -->
+
+            <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme"
+                 id="layout-navbar">
+                <div class="container-fluid">
+                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                            <i class="bx bx-menu bx-sm"></i>
+                        </a>
+                    </div>
+
+                    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+
+                        <ul class="navbar-nav flex-row align-items-center ms-auto">
+
+
+                            <ul class="navbar-nav ms-lg-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="javascript:void(0);"><i
+                                            class="tf-icons navbar-icon bx bx-user"></i>
+                                        {% if request.user.is_superuser %}
+                                            {{ request.user.profile }}
+                                            <small>
+                                                (مدیریت)
+                                            </small>
+                                        {% else %}
+                                            {{ request.user.profile }}
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            </ul>
+
+
+                            <!-- User -->
+                            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
+                                   data-bs-toggle="dropdown">
+                                    <div class="avatar avatar-online">
+                                        <img src="{% static 'img/avatars/default.png' %}" alt
+                                             class="rounded-circle">
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="d-flex">
+                                                <div class="flex-grow-1">
+                                                        <span class="fw-semibold d-block">
+                                                            {% if request.user.is_superuser %}
+                                                                مدیریت
+                                                            {% else %}
+                                                                {{ request.user.profile }}
+                                                            {% endif %}
+                                                        </span>
+                                                    <small>
+                                                        {% if request.user.is_superuser %}
+                                                            مدیر
+                                                        {% else %}
+                                                            {{ request.user.profile.role.name }}
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'profile' %}">
+                                            <i class="bx bx-user me-2"></i>
+                                            <span class="align-middle">پروفایل من</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'change_password' %}">
+                                            <i class="bx bx-cog me-2"></i>
+                                            <span class="align-middle">تغییر رمزعبور</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'logout' %}" target="_blank">
+                                            <i class="bx bx-power-off me-2"></i>
+                                            <span class="align-middle">خروج</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!--/ User -->
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- / Navbar -->
+
+            <!-- Content wrapper -->
+            <div class="content-wrapper">
+                <!-- Content -->
+
+                <div class="container-xxl flex-grow-1 container-p-y">
+                    {% block content %}
+                    {% endblock content %}
+                </div>
+                <!-- / Content -->
+
+                <!-- Footer -->
+                <footer class=" content-footer footer bg-footer-theme">
+                    <div
+                            class="container-fluid d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div class="mb-2 mb-md-0">طراحی و اجرا : واحد تحقیق و توسعه گروه صنعتی ANG</div>
+                        <div>
+                            <a href="#" class="footer-link me-4" target="_blank"></a>
+
+                        </div>
+                    </div>
+                </footer>
+                <!-- / Footer -->
+
+                <div class="content-backdrop fade"></div>
+            </div>
+            <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+    </div>
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+
+    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+    <div class="drag-target"></div>
+</div>
+<!-- / Layout wrapper -->
+
+<!-- Core JS -->
+<!-- build:js assets/vendor/js/core.js -->
+<script src="{% static 'vendor/libs/jquery/jquery.js' %}"></script>
+<script src="{% static 'vendor/libs/popper/popper.js' %}"></script>
+<script src="{% static 'vendor/js/bootstrap.js' %}"></script>
+<script src="{% static 'vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+
+<script src="{% static 'vendor/libs/hammer/hammer.js' %}"></script>
+
+<script src="{% static 'vendor/libs/i18n/i18n.js' %}"></script>
+<script src="{% static 'vendor/libs/typeahead-js/typeahead.js' %}"></script>
+
+<script src="{% static 'vendor/js/menu.js' %}"></script>
+<!-- endbuild -->
+
+<!-- Vendors JS -->
+<script src="{% static 'vendor/libs/jdate/jdate.js' %}"></script>
+<script src="{% static 'vendor/libs/flatpickr/flatpickr-jdate.js' %}"></script>
+<script src="{% static 'vendor/libs/flatpickr/l10n/fa-jdate.js' %}"></script>
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+<script src="{% static 'vendor/libs/pickr/pickr.js' %}"></script>
+
+<script src="{% static 'vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
+
+<!-- Main JS -->
+<script src="{% static 'js/main.js' %}"></script>
+
+<!-- Vendors JS -->
+<script src="{% static 'vendor/libs/autosize/autosize.js' %}"></script>
+<script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+<script src="{% static 'vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+<script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+<script src="{% static 'vendor/libs/cleavejs/cleave.js' %}"></script>
+
+<!-- Page JS -->
+<script src="{% static 'js/forms-extras.js' %}"></script>
+<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+<script src="{% static 'js/app-access-roles.js' %}"></script>
+<script src="{% static 'js/forms-selects.js' %}"></script>
+<script src="{% static 'js/forms-pickers.js' %}"></script>
+<script src="{% static 'js/order-detail.js' %}"></script>
+<script src="{% static 'js/custom-switch.js' %}"></script>
+<script src="{% static 'js/reviewTask.js' %}"></script>
+<script src="{% static 'js/paginate.js' %}"></script>
+<script src="{% static 'js/app-invoice-edit.js' %}"></script>
+<script src="{% static 'js/offcanvas-add-payment.js' %}"></script>
+<script src="{% static 'js/offcanvas-send-payment.js' %}"></script>
+<script src="{% static 'js/extended-ui-sweetalert2.js' %}"></script>
+<script src="{% static 'js/tables-datatables-advanced.js' %}"></script>
+<script src="{% static 'js/ui-modals.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function (e) {
+        (function () {
+            // Select All checkbox click
+            const selectAll = document.querySelector('#selectAll'),
+                checkboxList = document.querySelectorAll('[type="checkbox"]');
+            if (selectAll) {
+                selectAll.addEventListener('change', t => {
+                    checkboxList.forEach(e => {
+                        e.checked = t.target.checked;
+                    });
+                });
+            }
+        })();
+    });
+</script>
+</body>
+
+</html>

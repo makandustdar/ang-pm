@@ -1,0 +1,187 @@
+{% extends '../base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">ثبت درخواست</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <form id="formValidationExamples" action="{% url 'order_add' %}" method="post">
+                {% csrf_token %}
+                <div class="row ">
+                    <div class="col-md-3 align-self-center">
+                        <div class="mb-1 justify-content-around d-flex">
+                            <label for="is_machine">ثبت درخواست ماشین</label>
+                            <input type="checkbox" id="is_machine" onchange="changePartDisplay('m')"
+                                   name="create_machine">
+                        </div>
+                        <div class=" justify-content-around d-flex">
+                            <label for="is_department">ثبت درخواست محیط</label>
+                            <input type="checkbox" id="is_department" onchange="changePartDisplay('d')"
+                                   name="create_department">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-1" id="operation_div">
+                        <label for="" class="form-label">عملیات درخواستی*</label>
+                        <select class="select2 form-select form-select-lg" id="operationselect" data-allow-clear="true"
+                                onchange="getParts()" name="operation">
+                            <option value="">لطفا انتخاب کنید</option>
+                            {% for operation in operations %}
+                                <option value="{{ operation.id }}">{{ operation.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-1 d-none" id="department_div">
+                        <label for="" class="form-label">محیط درخواستی*</label>
+                        <select class="select2 form-select form-select-lg" id="departmentselect" data-allow-clear="true"
+                                onchange="getStuff()" name="department">
+                            <option value="">لطفا انتخاب کنید</option>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}">{{ department.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-1 d-none" id="part_div">
+                        <label for="" class="form-label">قطعات مربوطه</label>
+                        <select class="select2 form-select form-select-lg" id="partselect" data-allow-clear="true"
+                                name="part">
+                            <option value="">لطفا انتخاب کنید</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-1 d-none" id="stuff_div">
+                        <label for="" class="form-label">وسایل مربوطه</label>
+                        <select class="select2 form-select form-select-lg" id="stuffselect" data-allow-clear="true"
+                                name="stuff">
+                            <option value="">لطفا انتخاب کنید</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="select2Success" class="form-label">زیرگروه</label>
+                        <div class="select2-success">
+                            <select id="select2Success" class="select2 form-select" name="subgroup" multiple required>
+                                {% for subgroup in subgroups %}
+                                    <option value="{{ subgroup.id }}">{{ subgroup.name }} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-1">
+                        <label for="" class="form-label">اولویت</label>
+                        <select class="form-select" name="priority" id="">
+                            <option value="">انتخاب کنید</option>
+                            <option value="1">کم</option>
+                            <option value="2">متوسط</option>
+                            <option value="3">زیاد</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-1">
+                        <label for="" class="form-label">توضیحات</label>
+                        <textarea style="  height: 150px;" class="form-control" placeholder="توضیح"
+                                  name='description'>  </textarea>
+
+
+                    </div>
+                    <div class="mt-1">
+                        <button type="submit" class="btn btn-primary me-2">ثبت</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        let operation = document.getElementById('operationselect')
+        let department = document.getElementById('departmentselect')
+
+        function changePartDisplay(char) {
+            let is_machine = document.getElementById('is_machine')
+            let is_department = document.getElementById('is_department')
+            let operation_div = document.getElementById('operation_div')
+            let department_div = document.getElementById('department_div')
+            let formElement = document.getElementById('formValidationExamples')
+            if (is_machine.checked && char === 'd') {
+                formElement.reset()
+                is_department.checked = true
+                department.required = true
+                operation.required = false
+            }
+            if (is_department.checked && char === 'm') {
+                formElement.reset()
+                is_machine.checked = true
+                operation.required = true
+                department.required = false
+
+            }
+
+            if (is_machine.checked) {
+                document.getElementById('part_div').classList.remove('d-none')
+                document.getElementById('stuff_div').classList.add('d-none')
+                department_div.classList.add('d-none')
+                operation_div.classList.remove('d-none')
+            }
+            if (is_department.checked) {
+                document.getElementById('part_div').classList.add('d-none')
+                document.getElementById('stuff_div').classList.remove('d-none')
+                department_div.classList.remove('d-none')
+                operation_div.classList.add('d-none')
+            }
+
+        }
+
+
+        function getParts() {
+            let partSelect = document.getElementById('partselect')
+            partSelect.innerHTML = ''
+
+            function addPartOption(item, index) {
+                let opt = document.createElement('option');
+                opt.value = item[1];
+                opt.innerHTML = item[0];
+                partSelect.appendChild(opt);
+            }
+
+
+            (async function () {
+                await fetch(`/ajax/get-parts/?operation_id=${operation.value}`).then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    data.data.forEach(addPartOption);
+                });
+            })();
+
+        }
+
+        function getStuff() {
+            let stuffSelect = document.getElementById('stuffselect')
+            stuffSelect.innerHTML = ''
+
+
+            function addStuffOption(item, index) {
+                let opt = document.createElement('option');
+                opt.value = item[1];
+                opt.innerHTML = item[0];
+                stuffSelect.appendChild(opt);
+            }
+
+            (async function () {
+                await fetch(`/ajax/get-stuff/?department_id=${department.value}`).then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    data.data.forEach(addStuffOption);
+                });
+            })();
+        }
+
+    </script>
+{% endblock content %}

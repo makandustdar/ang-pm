@@ -1,0 +1,170 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <h4 class="py-3 breadcrumb-wrapper mb-2">لیست کاربران</h4>
+
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-header border-bottom">
+            <h5 class="card-title">فیلتر جستجو</h5>
+            <form action="{% url 'users_list' %}">
+                <div class="d-flex justify-content-between align-items-center row py-3 gap-3 gap-md-0">
+                    <div class="col-md-3 user_role">
+                        <input type="search" class="form-control" name="q" value="{{ request.GET.q }}"
+                               placeholder="جستجو در نام / نام کاربری">
+                    </div>
+
+                    <div class="col-md-3 user_role">
+                        <select class="form-select" name="role" id="">
+                            <option value="">انتخاب نقش</option>
+                            {% for role in roles %}
+                                <option value="{{ role.id }}" {% if request.GET.role|add:0 == role.id %}
+                                        selected {% endif %}>
+                                    {{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 user_plan">
+                        <select class="form-select" name="status" id="">
+                            <option value="">انتخاب وضعیت</option>
+                            <option value="1" {% if request.GET.status == '1' %} selected {% endif %}>فعال</option>
+                            <option value="0" {% if request.GET.status == '0' %} selected {% endif %}>غیر فعال</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 user_status">
+                        <button type="submit" class="btn btn-label-primary">اعمال فیلتر</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-datatable table-responsive">
+            <table class="table border-top text-center">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>کاربر</th>
+                    <th>نام کاربری</th>
+                    <th>نقش</th>
+                    <th>واحد</th>
+                    <th>شماره همراه</th>
+                    <th>وضعیت</th>
+                    <th>عمل‌ها</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ user.profile }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                        <span class="badge bg-label-primary">
+                            {% for role in user.groups.all %}
+                                {{ role.name }}
+                            {% endfor %}
+                        </span>
+                        </td>
+                        <td><span class="badge bg-label-success">{{ user.profile.department.name }}</span></td>
+                        <td>{{ user.profile.mobileNumber }}</td>
+                        <td>
+                            <label class="switch switch-square" for="customSwitch_{{ user.id }}">
+                                <input type="checkbox" class="switch-input userStatusSwitch" data-id="{{ user.id }}"
+                                       data-db="user" id="customSwitch_{{ user.id }}" {% if user.is_active %} checked
+                                {% endif %}>
+                                <span class="switch-toggle-slider">
+                                <span class="switch-on"></span>
+                                <span class="switch-off"></span>
+                            </span>
+                            </label>
+                        </td>
+                        <td>
+                            <div class="d-inline-block text-nowrap">
+                                <a href="{% url 'user_edit' user.username %}" class="btn btn-sm btn-icon">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-icon delete-record"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#delete_user_modal_{{ user.id }}"
+                                >
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                                <div class="modal fade" id="delete_user_modal_{{ user.id }}" tabindex="-1"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title secondary-font" id="modalCenterTitle">عنوان
+                                                    مودال</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-title">
+                                                <div class="swal2-icon swal2-warning swal2-icon-show"
+                                                     style="display: flex;">
+                                                    <div class="swal2-icon-content">!</div>
+                                                </div>
+                                                <p class="fs-3">آیا مطمئن هستید؟</p>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{% url 'user_delete' user.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-label-danger"
+                                                            data-bs-dismiss="modal">
+                                                        حذف کن
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="pagination justify-content-center">
+                {% if is_paginated %}
+                    <div class="card-footer">
+                        <div style="text-align: center;">
+
+                            {% if page_obj.has_previous %}
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#" data-num="1">اولین صفحه</a>
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                   data-num="{{ page_obj.previous_page_number }}">قبلی</a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <a class="btn btn-primary btn-sm  paging" href="#"
+                                       data-num="{{ num }}">{{ num }}</a>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                       data-num="{{ num }}">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                   data-num="{{ page_obj.next_page_number }}">بعدی</a>
+                                <a class="btn btn-outline-primary btn-sm  paging" href="#"
+                                   data-num="{{ page_obj.paginator.num_pages }}">
+                                    آخرین صفحه</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

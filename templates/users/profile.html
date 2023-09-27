@@ -1,0 +1,56 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h4 class="py-3 breadcrumb-wrapper mb-2">پروفایل</h4>
+
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="alert alert-danger">{{ message }}</div>
+{% else %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endif %}
+{% endfor %}
+
+
+<div class="card">
+    <div class="card-body">
+        <form id="formValidationExamples" action="{% url 'profile' %}" method="post">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-4 mb-1">
+                    <label for="" class="form-label">نام*</label>
+                    <input class="form-control" type="text" name="fname" value="{{ user.first_name }}" required>
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label for="" class="form-label">نام خانوادگی*</label>
+                    <input class="form-control" type="text" name="lname" value="{{ user.last_name }}" required>
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label for="" class="form-label">نام کاربری*</label>
+                    <input class="form-control" type="text" name="username" value="{{ user.username }}" required disabled>
+                </div>
+
+
+                <div class="col-md-6 mb-1">
+                    <label for="" class="form-label">شماره همراه</label>
+                    <input class="form-control" type="text" name="mobile" value="{{ user.profile.mobileNumber }}"
+                        required>
+                </div>
+                <div class="col-md-6 mb-1">
+                    <label for="" class="form-label">ایمیل</label>
+                    <input class="form-control" type="text" name="email" value="{{ user.email }}">
+                </div>
+
+            </div>
+            <div class="mt-1">
+                <button type="submit" class="btn btn-primary me-2">ثبت تغییرات</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% endblock content %}
