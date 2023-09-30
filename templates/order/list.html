@@ -247,8 +247,8 @@
                                                                     </tr>
                                                                     </thead>
                                                                     <tbody>
-                                                                    {% for task in tasks %}
-                                                                        {% if task in order.task.all %}
+                                                                    {% for task in order.task.all %}
+{#                                                                        {% if task in order.task.all %}#}
                                                                             <tr>
                                                                                 <td>{{ task.user.profile }}</td>
                                                                                 <td>{{ task.description|truncatewords:"10"|linebreaks }}
@@ -264,7 +264,7 @@
                                                                                 </span>
                                                                                 </td>
                                                                             </tr>
-                                                                        {% endif %}
+{#                                                                        {% endif %}#}
                                                                     {% endfor %}
                                                                     </tbody>
                                                                 </table>

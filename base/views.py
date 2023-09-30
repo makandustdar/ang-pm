@@ -120,16 +120,6 @@ class OrdersList(ListView):
         context['departments'] = Department.objects.all()
         status_choices = Order.StatusChoices
         context['status_choices'] = status_choices
-        context['tasks'] = Task.published.all()
-        
-        # context['operators'] = User.objects.filter(groups__name='اپراتور فنی')
-        # context['templatetags'] = contains_building
-        # context['operations'] = [Operation.objects.all()]
-        # context['departments'] = []
-        # status_choices = Order.StatusChoices
-        # context['status_choices'] = status_choices
-        # context['tasks'] = []
-        
         return context
 
 
