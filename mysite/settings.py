@@ -1,5 +1,7 @@
 from pathlib import Path
 import os
+import django_heroku
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -192,3 +194,5 @@ CELERY_ENABLE_UTC = False
 
 
 LOGIN_URL = '/login/'
+
+django_heroku.settings(locals())
